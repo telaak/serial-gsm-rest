@@ -10,6 +10,7 @@ RUN apk add --no-cache --virtual .gyp \
             g++ \
     && npm install serialport --build-from-source \
     && apk del .gyp
+RUN chown -R node:node /app
 USER node
 RUN npm i
 RUN npx tsc
@@ -19,6 +20,7 @@ WORKDIR /app
 COPY --from=base ./app/dist ./dist
 COPY package*.json ./
 ENV NODE_ENV production
+RUN chown -R node:node /app
 USER NODE
 RUN npm i
 
