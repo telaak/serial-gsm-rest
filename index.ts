@@ -10,7 +10,7 @@ const port = 4000;
 
 
 export const gsmHandler = new GSMHandler();
-export const messageStore = new MessageStore("./db.sqlite");
+export const messageStore = new MessageStore(process.env.SQLITE_PATH as string);
 
 gsmHandler.on("newMessage", async (messages: SMSMessage[]) => {
   messages.forEach(async (message) => {
