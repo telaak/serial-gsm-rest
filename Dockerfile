@@ -1,6 +1,7 @@
 FROM node:18-alpine as base
 
 WORKDIR /app
+COPY . .
 RUN apk add --no-cache --virtual .gyp \
             python3 \
             make \
@@ -9,9 +10,7 @@ RUN apk add --no-cache --virtual .gyp \
             g++ \
     && npm install serialport --build-from-source \
     && npm install \
-    && npm install typescript -g \
     && apk del .gyp
-COPY . .
 RUN npx tsc
 
 FROM node:18-alpine as runner
