@@ -1,0 +1,11 @@
+version: '3.1'
+
+services:
+  gsm-rest:
+    image: telaaks/serial-gsm-rest
+    ports:
+      - 4500:4500
+    environment:
+      - GSMTTY=/dev/ttyUSB0
+    devices:
+      - /dev/tty.usbserial-2120:/dev/ttyUSB0
