@@ -1,6 +1,7 @@
 FROM node:18-alpine as base
 
 WORKDIR /app
+USER node
 COPY . .
 RUN apk add --no-cache --virtual .gyp \
             python3 \
