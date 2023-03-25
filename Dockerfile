@@ -1,7 +1,6 @@
 FROM node:18-alpine as base
 
 WORKDIR /app
-USER node
 COPY . .
 RUN apk add --no-cache --virtual .gyp \
             python3 \
@@ -10,8 +9,9 @@ RUN apk add --no-cache --virtual .gyp \
             udev \
             g++ \
     && npm install serialport --build-from-source \
-    && npm install \
     && apk del .gyp
+USER node
+RUN npm i
 RUN npx tsc
 
 FROM node:18-alpine as runner
@@ -19,6 +19,7 @@ WORKDIR /app
 COPY --from=base ./app/dist ./dist
 COPY package*.json ./
 ENV NODE_ENV production
+USER NODE
 RUN npm i
 
 EXPOSE 4500
