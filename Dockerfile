@@ -21,7 +21,7 @@ COPY --from=base ./app/dist ./dist
 COPY package*.json ./
 ENV NODE_ENV production
 RUN chown -R node:node /app
-USER NODE
+USER node
 RUN npm i
 
 EXPOSE 4500
