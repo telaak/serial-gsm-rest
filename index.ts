@@ -46,6 +46,7 @@ gsmHandler.on("sentMessage", async (sentMessage: SendSMSCallback) => {
   }
 });
 
+Server.use("/ws", socket.router);
 Server.use(gsmRouter);
 Server.use(sqliteRouter);
 
