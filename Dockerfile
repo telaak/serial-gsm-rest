@@ -18,6 +18,7 @@ RUN npx tsc
 
 FROM node:20 as runner
 WORKDIR /app
+RUN apk add --no-cache gcompat
 COPY --from=base ./app/dist ./dist
 COPY package*.json ./
 ENV NODE_ENV production
