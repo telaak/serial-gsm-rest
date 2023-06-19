@@ -1,87 +1,73 @@
-import { Router } from "express";
-import { gsmHandler, messageStore } from "..";
+import HyperExpress, { SendableData } from "hyper-express";
+import { messageStore } from "..";
+export const sqliteRouter = new HyperExpress.Router();
 
-export const sqliteRouter = Router();
+sqliteRouter.get("/", async (req, res) => {
+  try {
+    const messages = await messageStore.getMessages();
+    res.json(messages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error as SendableData);
+  }
+});
 
-sqliteRouter
-  .route("/messages")
-
-  .get(async (req, res) => {
-    try {
-      const messages = await messageStore.getMessages();
-      res.json(messages);
-    } catch (error) {
+sqliteRouter.get("/messages/:rowid", async (req, res) => {
+  try {
+    const message = await messageStore.getMessage(req.params.rowid);
+    res.json(message);
+  } catch (error) {
+    if (error) {
       console.error(error);
-      res.status(500).send(error);
+      res.status(500).send(error as SendableData);
+    } else {
+      res.sendStatus(404);
     }
-  });
+  }
+});
+sqliteRouter.delete("/messages/:rowid", async (req, res) => {
+  try {
+    const message = await messageStore.getMessage(req.params.rowid);
+    // await gsmHandler.deleteMessage(message.index);
+    await messageStore.deleteMessage(message.rowid as number);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error as SendableData);
+  }
+});
 
-sqliteRouter
-  .route("/messages/:rowid")
+sqliteRouter.get("/sent", async (req, res) => {
+  try {
+    const messages = await messageStore.getSentMessages();
+    res.json(messages);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error as SendableData);
+  }
+});
 
-  .get(async (req, res) => {
-    try {
-      const message = await messageStore.getMessage(req.params.rowid);
-      res.json(message);
-    } catch (error) {
-      if (error) {
-        console.error(error);
-        res.status(500).send(error);
-      } else {
-        res.sendStatus(404);
-      }
-    }
-  })
-
-  .delete(async (req, res) => {
-    try {
-      const message = await messageStore.getMessage(req.params.rowid);
-      // await gsmHandler.deleteMessage(message.index);
-      await messageStore.deleteMessage(message.rowid as number);
-      res.sendStatus(200);
-    } catch (error) {
+sqliteRouter.get("/sent/:rowid", async (req, res) => {
+  try {
+    const message = await messageStore.getSentMessage(req.params.rowid);
+    res.json(message);
+  } catch (error) {
+    if (error) {
       console.error(error);
-      res.status(500).send(error);
+      res.status(500).send(error as SendableData);
+    } else {
+      res.sendStatus(404);
     }
-  });
+  }
+});
 
-sqliteRouter
-  .route("/sent")
-
-  .get(async (req, res) => {
-    try {
-      const messages = await messageStore.getSentMessages();
-      res.json(messages);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send(error);
-    }
-  });
-
-sqliteRouter
-  .route("/sent/:rowid")
-
-  .get(async (req, res) => {
-    try {
-      const message = await messageStore.getSentMessage(req.params.rowid);
-      res.json(message);
-    } catch (error) {
-      if (error) {
-        console.error(error);
-        res.status(500).send(error);
-      } else {
-        res.sendStatus(404);
-      }
-    }
-  })
-
-  .delete(async (req, res) => {
-    try {
-      const message = await messageStore.getSentMessage(req.params.rowid);
-      await messageStore.deleteSentMessage(message.rowid as number);
-      res.sendStatus(200);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send(error);
-    }
-  });
+sqliteRouter.delete("/sent/:rowid", async (req, res) => {
+  try {
+    const message = await messageStore.getSentMessage(req.params.rowid);
+    await messageStore.deleteSentMessage(message.rowid as number);
+    res.sendStatus(200);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send(error as SendableData);
+  }
+});

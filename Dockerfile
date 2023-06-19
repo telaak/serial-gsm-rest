@@ -1,13 +1,14 @@
-FROM node:18-alpine as base
+FROM node:20-alpine as base
 
 WORKDIR /app
 COPY . .
 RUN apk add --no-cache --virtual .gyp \
-            python3 \
-            make \
-            linux-headers \
-            udev \
-            g++ \
+    python3 \
+    make \
+    linux-headers \
+    udev \
+    g++ \
+    gcompat \
     && npm install serialport --build-from-source \
     && apk del .gyp
 RUN chown -R node:node /app
@@ -15,7 +16,7 @@ USER node
 RUN npm i
 RUN npx tsc
 
-FROM node:18-alpine as runner
+FROM node:20-alpine as runner
 WORKDIR /app
 COPY --from=base ./app/dist ./dist
 COPY package*.json ./
@@ -24,6 +25,6 @@ RUN chown -R node:node /app
 USER node
 RUN npm i
 
-EXPOSE 4500
+EXPOSE 4000
 
 CMD [ "node", "./dist/index.js" ]
