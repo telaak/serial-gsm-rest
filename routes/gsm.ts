@@ -12,10 +12,10 @@ gsmRouter.get("/gsm", async (req, res) => {
   }
 });
 gsmRouter.post("/gsm", async (req, res) => {
-  const { recipient, message } = req.body;
-  if (!recipient || !message) return res.sendStatus(422);
+  const body = await req.json()
+  if (!body.recipient || !body.message) return res.sendStatus(422);
   try {
-    const sentMessages = await gsmHandler.sendMessage(recipient, message);
+    const sentMessages = await gsmHandler.sendMessage(body.recipient, body.message);
     res.json(sentMessages);
   } catch (error) {
     console.error(error);
