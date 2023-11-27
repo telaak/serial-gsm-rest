@@ -6,11 +6,41 @@ import HyperExpress from "hyper-express";
 import { gsmRouter } from "./routes/gsm";
 import { sqliteRouter } from "./routes/sqlite";
 
-const Server = new HyperExpress.Server();
-const socket = new SocketHandler();
+/**
+ * HyperExpress Server instance
+ * @const
+ */
+
+export const Server = new HyperExpress.Server();
+
+/**
+ * WebSocket handler instance
+ * @constant
+ */
+
+export const socket = new SocketHandler();
+
+/**
+ * GSM Handler instance
+ * @const
+ */
 
 export const gsmHandler = new GSMHandler();
+
+/**
+ * SQLite message store instance
+ * @const
+ */
+
 export const messageStore = new MessageStore(process.env.SQLITE_PATH as string);
+
+/**
+ * Event handler for new messages received
+ * Emits an event to each WebSocket connection
+ * Saves the message to the SQLite database
+ * Deletes the message from the SIM card
+ * @function
+ */
 
 gsmHandler.on("newMessage", async (messages: SMSMessage[]) => {
   messages.forEach(async (message) => {
@@ -28,6 +58,13 @@ gsmHandler.on("newMessage", async (messages: SMSMessage[]) => {
     }
   });
 });
+
+/**
+ * Event handler for sent messages
+ * Emits an event to each WebSocket connection
+ * Saves the message to the SQLite database
+ * @function
+ */
 
 gsmHandler.on("sentMessage", async (sentMessage: SendSMSCallback) => {
   try {

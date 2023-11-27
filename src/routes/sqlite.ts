@@ -1,6 +1,16 @@
 import HyperExpress, { SendableData } from "hyper-express";
 import { messageStore } from "..";
+
+/**
+ * Router for the SQLite API
+ * @const
+ */
+
 export const sqliteRouter = new HyperExpress.Router();
+
+/**
+ * Gets all received messages from the database
+ */
 
 sqliteRouter.get("/", async (req, res) => {
   try {
@@ -11,6 +21,11 @@ sqliteRouter.get("/", async (req, res) => {
     res.status(500).send(error as SendableData);
   }
 });
+
+/**
+ * Gets a specified received message from the database
+ * @param rowId 
+ */
 
 sqliteRouter.get("/messages/:rowid", async (req, res) => {
   try {
@@ -25,6 +40,12 @@ sqliteRouter.get("/messages/:rowid", async (req, res) => {
     }
   }
 });
+
+/**
+ * Deletes a specified received message from the database
+ * @param rowId 
+ */
+
 sqliteRouter.delete("/messages/:rowid", async (req, res) => {
   try {
     const message = await messageStore.getMessage(req.params.rowid);
@@ -37,6 +58,10 @@ sqliteRouter.delete("/messages/:rowid", async (req, res) => {
   }
 });
 
+/**
+ * Gets all sent messages from the database
+ */
+
 sqliteRouter.get("/sent", async (req, res) => {
   try {
     const messages = await messageStore.getSentMessages();
@@ -46,6 +71,10 @@ sqliteRouter.get("/sent", async (req, res) => {
     res.status(500).send(error as SendableData);
   }
 });
+
+/**
+ * Gets a specified sent message from the database
+ */
 
 sqliteRouter.get("/sent/:rowid", async (req, res) => {
   try {
@@ -60,6 +89,10 @@ sqliteRouter.get("/sent/:rowid", async (req, res) => {
     }
   }
 });
+
+/**
+ * Deletes a specified sent message from the database
+ */
 
 sqliteRouter.delete("/sent/:rowid", async (req, res) => {
   try {

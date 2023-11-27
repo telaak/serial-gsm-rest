@@ -1,6 +1,11 @@
 import HyperExpress from "hyper-express";
 import { EventEmitter } from "events";
 
+/**
+ * Class for handling multiple websocket connections
+ * Keeps an internal state for socket.io-esque emitting to all connections
+ */
+
 export class SocketHandler extends EventEmitter {
   private _router = new HyperExpress.Router();
   private sockets: Set<HyperExpress.Websocket> = new Set();

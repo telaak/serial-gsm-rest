@@ -11,6 +11,11 @@ import {
 } from "./ModemTypes";
 dotenv.config();
 
+/**
+ * Options for the GSM modem
+ * @const
+ */
+
 const options = {
   enableConcatenation: false,
   incomingCallIndication: true,
@@ -19,6 +24,14 @@ const options = {
   logger: console,
   baudRate: 9600,
 };
+
+/**
+ * Cuts a string into chunks
+ * Used to cut text messages into parts
+ * @param str 
+ * @param size 
+ * @returns 
+ */
 
 function chunkSubstr(str: string, size: number) {
   const numChunks = Math.ceil(str.length / size);
@@ -31,9 +44,21 @@ function chunkSubstr(str: string, size: number) {
   return chunks;
 }
 
+/**
+ * Splits a text message into chunks of 140 characters
+ * @param message 
+ * @returns 
+ */
+
 function splitMessage(message: string) {
     return chunkSubstr(message, 140)
 }
+
+/**
+ * Main class for handling the GSM-modem's connection
+ * Emits events on received and sent messages
+ * Uses serialport-gsm's functions wrapped in Promises
+ */
 
 export default class GSMHandler extends EventEmitter {
   private modem = serialportgsm.Modem();
@@ -43,6 +68,11 @@ export default class GSMHandler extends EventEmitter {
     super();
     this.init();
   }
+
+  /**
+   * Promise for checking whether the modem's connection is open (ready)
+   * Loops until it resolves
+   */
 
   private isModemOpenPromise = new Promise((resolve, reject) => {
     const loop = () =>
@@ -54,6 +84,10 @@ export default class GSMHandler extends EventEmitter {
     loop();
   });
 
+  /**
+   * Opens and initializes the moden's connection
+   */
+
   async openModem() {
     const modemConnection = await this.modem.open(process.env.GSMTTY, options);
     const gsmModem = await this.modem.initializeModem();
@@ -61,6 +95,11 @@ export default class GSMHandler extends EventEmitter {
 
     this.isOpen = true;
   }
+
+  /**
+   * Gets all the messages from the SIM card's internal inbox
+   * @returns Promise with either {@link GetSimInboxCallback} or {@link GetSimInboxError}
+   */
 
   async getSimInbox(): Promise<SMSMessage[]> {
     await this.isModemOpenPromise;
@@ -73,6 +112,17 @@ export default class GSMHandler extends EventEmitter {
       }
     });
   }
+
+  /**
+   * Sends a message to phone number specified
+   * Splits message into chunks if it's too large and sends multiple messages
+   * Creates promises for each message and resolves only if every one succeeds
+   * Emits event for a sent message `sentMessage` {@link SendSMSCallback}
+   * @param recipient phone number
+   * @param message content
+   * @param alert whether to send the message as an alert (type 0, silent)
+   * @returns 
+   */
 
   async sendMessage(
     recipient: string,
@@ -105,6 +155,12 @@ export default class GSMHandler extends EventEmitter {
     });
   }
 
+  /**
+   * Deletes a message from the SIM card's internal inbox
+   * @param index 
+   * @returns 
+   */
+
   async deleteMessage(index: number) {
     await this.isModemOpenPromise;
     const deleteCommand: DeleteMessageCallback = await this.modem.deleteMessage(
@@ -112,6 +168,12 @@ export default class GSMHandler extends EventEmitter {
     );
     return deleteCommand;
   }
+
+  /**
+   * Reads a message from the SIM card's internal inbox
+   * @param index 
+   * @returns 
+   */
 
   async getMessage(index: number): Promise<SMSMessage> {
     await this.isModemOpenPromise;
@@ -130,11 +192,20 @@ export default class GSMHandler extends EventEmitter {
     });
   }
 
+  /**
+   * Deletes all messages from the SIM card's internal inbox
+   * @returns 
+   */
+
   async deleteAllMessages() {
     await this.isModemOpenPromise;
     const deleteCommand = await this.modem.deleteAllSimMessages();
     return deleteCommand;
   }
+
+  /**
+   * Opens the modem and sets the event emitter
+   */
 
   async init() {
     await this.openModem();

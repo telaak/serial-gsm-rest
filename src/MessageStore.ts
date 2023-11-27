@@ -24,14 +24,30 @@ export type SentMessageRow = {
   dateTimeSent: Date;
 };
 
+/**
+ * Helper class for storing SMS messages (both received and sent) in a simple SQLite database
+ */
+
 export class MessageStore {
-  public database;
+  
+  public database: sqlite3.Database;
+
+  /**
+   * Creates a database at the path provided
+   * Calls {@link createTables} to create the necessary tables
+   * @param path 
+   */
 
   constructor(path: string) {
     this.database = new sqlite3.Database(path);
     this.database.serialize();
     this.createTables();
   }
+
+  /**
+   * Creates tables for SMS messages (both received and sent)
+   * Checks whether tables already exist `IF NOT EXISTS`
+   */
 
   createTables() {
     const table = `CREATE TABLE IF NOT EXISTS messages
@@ -53,6 +69,12 @@ export class MessageStore {
     const sent = `CREATE TABLE IF NOT EXISTS sent (message TEXT, recipient TEXT, dateTimeSent datetime)`;
     this.database.run(sent);
   }
+
+  /**
+   * Converts SQL rows to {@link SMSMessage}
+   * @param row 
+   * @returns 
+   */
 
   serializeRow(row: SqliteMessageRow) {
     const message: SMSMessage = {
@@ -81,6 +103,13 @@ export class MessageStore {
     return message;
   }
 
+  /**
+   * Saves a sent SMS message to the sent messages table
+   * @param message message content
+   * @param recipient recipient's phone number
+   * @returns 
+   */
+
   async saveSentMessage(message: string, recipient: string): Promise<void> {
     return new Promise((resolve, reject) => {
       this.database.run(
@@ -101,6 +130,12 @@ export class MessageStore {
     });
   }
 
+  /**
+   * Gets a sent message
+   * @param rowid 
+   * @returns 
+   */
+
   async getSentMessage(rowid: string | number): Promise<SentMessageRow> {
     return new Promise((resolve, reject) => {
       this.database.get(
@@ -117,6 +152,11 @@ export class MessageStore {
     });
   }
 
+  /**
+   * Gets all sent messages from the table
+   * @returns 
+   */
+
   async getSentMessages(): Promise<SentMessageRow[]> {
     return new Promise((resolve, reject) => {
       this.database.all(
@@ -128,6 +168,12 @@ export class MessageStore {
       );
     });
   }
+  
+  /**
+   * Deletes a sent message from the table
+   * @param rowid 
+   * @returns 
+   */
 
   async deleteSentMessage(rowid: string | number): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -140,6 +186,12 @@ export class MessageStore {
       });
     });
   }
+
+  /**
+   * Deletes a received message from the table
+   * @param rowid 
+   * @returns 
+   */
 
   async deleteMessage(rowid: string | number): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -157,6 +209,12 @@ export class MessageStore {
     });
   }
 
+  /**
+   * Gets a received message from the table
+   * @param rowid 
+   * @returns 
+   */
+
   async getMessage(rowid: string | number): Promise<SMSMessage> {
     return new Promise((resolve, reject) => {
       this.database.get(
@@ -173,6 +231,11 @@ export class MessageStore {
     });
   }
 
+  /**
+   * Gets all received messages from the table
+   * @returns 
+   */
+
   async getMessages(): Promise<SMSMessage[]> {
     return new Promise((resolve, reject) => {
       this.database.all(
@@ -185,6 +248,12 @@ export class MessageStore {
       );
     });
   }
+
+  /**
+   * Saves a received message onto the table
+   * @param message 
+   * @returns 
+   */
 
   saveMessage(message: SMSMessage): Promise<void> {
     const sql = this.database.prepare(
