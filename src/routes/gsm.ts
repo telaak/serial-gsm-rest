@@ -1,12 +1,12 @@
-import HyperExpress, { SendableData } from "hyper-express";
 import { gsmHandler } from "..";
+import { Router } from "express";
 
 /**
  * Router for the GSM API
  * @const
  */
 
-export const gsmRouter = new HyperExpress.Router();
+export const gsmRouter = Router()
 
 /**
  * Gets all messages from the SIM card's internal inbox
@@ -18,7 +18,7 @@ gsmRouter.get("/gsm", async (req, res) => {
     res.json(inbox);
   } catch (error) {
     console.error(error);
-    res.status(500).send(error as SendableData);
+    res.status(500).send(error);
   }
 });
 
@@ -30,7 +30,7 @@ gsmRouter.get("/gsm", async (req, res) => {
  */
 
 gsmRouter.post("/gsm", async (req, res) => {
-  const body = await req.json();
+  const body = req.body
   if (!body.recipient || !body.message) return res.sendStatus(422);
   try {
     const sentMessages = await gsmHandler.sendMessage(
@@ -40,7 +40,7 @@ gsmRouter.post("/gsm", async (req, res) => {
     res.json(sentMessages);
   } catch (error) {
     console.error(error);
-    res.status(500).send(error as SendableData);
+    res.status(500).send(error);
   }
 });
 
@@ -59,7 +59,7 @@ gsmRouter.get("/gsm/:index", async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).send(error as SendableData);
+    res.status(500).send(error);
   }
 });
 
@@ -75,7 +75,7 @@ gsmRouter.delete("/gsm/:index", async (req, res) => {
   } catch (error) {
     if (error) {
       console.error(error);
-      res.status(500).send(error as SendableData);
+      res.status(500).send(error);
     } else {
       res.sendStatus(404);
     }

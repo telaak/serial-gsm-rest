@@ -1,4 +1,4 @@
-import HyperExpress, { SendableData } from "hyper-express";
+import { Router } from "express";
 import { messageStore } from "..";
 
 /**
@@ -6,7 +6,7 @@ import { messageStore } from "..";
  * @const
  */
 
-export const sqliteRouter = new HyperExpress.Router();
+export const sqliteRouter = Router();
 
 /**
  * Gets all received messages from the database
@@ -18,7 +18,7 @@ sqliteRouter.get("/", async (req, res) => {
     res.json(messages);
   } catch (error) {
     console.error(error);
-    res.status(500).send(error as SendableData);
+    res.status(500).send(error);
   }
 });
 
@@ -34,7 +34,7 @@ sqliteRouter.get("/messages/:rowid", async (req, res) => {
   } catch (error) {
     if (error) {
       console.error(error);
-      res.status(500).send(error as SendableData);
+      res.status(500).send(error);
     } else {
       res.sendStatus(404);
     }
@@ -54,7 +54,7 @@ sqliteRouter.delete("/messages/:rowid", async (req, res) => {
     res.sendStatus(200);
   } catch (error) {
     console.error(error);
-    res.status(500).send(error as SendableData);
+    res.status(500).send(error);
   }
 });
 
@@ -68,7 +68,7 @@ sqliteRouter.get("/sent", async (req, res) => {
     res.json(messages);
   } catch (error) {
     console.error(error);
-    res.status(500).send(error as SendableData);
+    res.status(500).send(error);
   }
 });
 
@@ -83,7 +83,7 @@ sqliteRouter.get("/sent/:rowid", async (req, res) => {
   } catch (error) {
     if (error) {
       console.error(error);
-      res.status(500).send(error as SendableData);
+      res.status(500).send(error);
     } else {
       res.sendStatus(404);
     }
@@ -101,6 +101,6 @@ sqliteRouter.delete("/sent/:rowid", async (req, res) => {
     res.sendStatus(200);
   } catch (error) {
     console.error(error);
-    res.status(500).send(error as SendableData);
+    res.status(500).send(error);
   }
 });

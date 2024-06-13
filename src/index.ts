@@ -1,24 +1,31 @@
+import express from "express";
+import expressWs from "express-ws";
 import GSMHandler from "./GSMHandler";
 import { SendSMSCallback, SMSMessage } from "./ModemTypes";
 import { MessageStore } from "./MessageStore";
-import { SocketHandler } from "./SocketHandler";
-import HyperExpress from "hyper-express";
 import { gsmRouter } from "./routes/gsm";
 import { sqliteRouter } from "./routes/sqlite";
+import "dotenv/config";
+
+const app = express();
+app.use(express.json());
+const expressWebsocket = expressWs(app);
 
 /**
- * HyperExpress Server instance
- * @const
+ * Websocket routing and logging
  */
 
-export const Server = new HyperExpress.Server();
+expressWebsocket.app.ws("/ws", function (ws, req) {
+  ws.on("message", console.log);
+  ws.on("open", (data: any) =>
+    console.log(`New websocket connection: ${data}`)
+  );
+});
 
-/**
- * WebSocket handler instance
- * @constant
- */
+app.use(gsmRouter);
+app.use(sqliteRouter);
 
-export const socket = new SocketHandler();
+app.listen(4000);
 
 /**
  * GSM Handler instance
@@ -45,11 +52,13 @@ export const messageStore = new MessageStore(process.env.SQLITE_PATH as string);
 gsmHandler.on("newMessage", async (messages: SMSMessage[]) => {
   messages.forEach(async (message) => {
     try {
-      socket.emitWs(
-        JSON.stringify({
-          type: "newMessage",
-          message,
-        })
+      expressWebsocket.getWss().clients.forEach((c) =>
+        c.send(
+          JSON.stringify({
+            type: "newMessage",
+            message,
+          })
+        )
       );
       await messageStore.saveMessage(message);
       await gsmHandler.deleteMessage(message.index);
@@ -68,11 +77,13 @@ gsmHandler.on("newMessage", async (messages: SMSMessage[]) => {
 
 gsmHandler.on("sentMessage", async (sentMessage: SendSMSCallback) => {
   try {
-    socket.emitWs(
-      JSON.stringify({
-        type: "sentMessage",
-        sentMessage,
-      })
+    expressWebsocket.getWss().clients.forEach((c) =>
+      c.send(
+        JSON.stringify({
+          type: "sentMessage",
+          sentMessage,
+        })
+      )
     );
     await messageStore.saveSentMessage(
       sentMessage.data.message,
@@ -82,11 +93,3 @@ gsmHandler.on("sentMessage", async (sentMessage: SendSMSCallback) => {
     console.error(error);
   }
 });
-
-Server.use("/ws", socket.router);
-Server.use(gsmRouter);
-Server.use(sqliteRouter);
-
-Server.listen(Number(process.env.port || 4000))
-  .then((socket) => console.log("Webserver started on port 4000"))
-  .catch((error) => console.log("Failed to start webserver on port 4000"));
