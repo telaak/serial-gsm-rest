@@ -15,7 +15,7 @@ const expressWebsocket = expressWs(app);
  * Websocket routing and logging
  */
 
-expressWebsocket.app.ws("/ws", function (ws, req) {
+expressWebsocket.app.ws("/ws/connect", function (ws, req) {
   ws.on("message", console.log);
   ws.on("open", (data: any) =>
     console.log(`New websocket connection: ${data}`)
