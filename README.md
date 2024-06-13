@@ -14,7 +14,7 @@ This project consists of 3 main parts:
 
 ### WebSocket and HTTP interface
 
-* The address for WebSocket connections is http://localhost:4000/ws/connect
+* The address for WebSocket connections is http://localhost:4000/ws/
 * The address for the HTTP interface is http://localhost:4000/
 
 See the route handlers for more information.
@@ -24,7 +24,6 @@ See the route handlers for more information.
 ### Dependencies
 
 * Node 21/20/18
-* HyperExpress requires a platform with glibc or glibc compatibility (musl etc.)
 
 ### Installing
 
